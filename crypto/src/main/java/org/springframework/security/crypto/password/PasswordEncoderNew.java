@@ -17,23 +17,27 @@
 package org.springframework.security.crypto.password;
 
 /**
- * Deprecated service interface for encoding passwords. Please use
- * {@code PasswordEncoderNew}.
+ * Service interface for encoding passwords.
  *
- * The preferred implementation is {@code BCryptPasswordEncoder}.
+ * As time goes hash functions are increasingly susceptible to brute-force attacks.
+ * Allways check the current requirements for a good hash implementation, OWASP is a an
+ * excellent source.
  *
- * @author Keith Donald
+ * @author Thomas Finneid
  */
-
-@Deprecated
-public interface PasswordEncoder {
+public interface PasswordEncoderNew {
 
 	/**
-	 * Encode the raw password. Generally, a good encoding algorithm applies a SHA-1 or
-	 * greater hash combined with an 8-byte or greater randomly generated salt.
+	 * Encode the raw password. Generally, a good encoding algorithm currently applies a
+	 * SHA-2/256 or greater hash combined with an 8-byte or greater randomly generated
+	 * salt. Allways check the current requirements for a good hash, OWASP is a an
+	 * excellent source.
+	 *
+	 * WARNING: Allways use a char array to store passwords before hashing. Never use
+	 * String, charSequence or similar classes. WARNING: Strings and similar are currently
+	 * interned and therefor will exists throughout the life of the running jvm.
 	 */
-	@Deprecated
-	String encode(CharSequence rawPassword);
+	String encode(char[] rawPassword);
 
 	/**
 	 * Verify the encoded password obtained from storage matches the submitted raw
@@ -44,8 +48,7 @@ public interface PasswordEncoder {
 	 * @return true if the raw password, after encoding, matches the encoded password from
 	 * storage
 	 */
-	@Deprecated
-	boolean matches(CharSequence rawPassword, String encodedPassword);
+	boolean matches(char[] rawPassword, String encodedPassword);
 
 	/**
 	 * Returns true if the encoded password should be encoded again for better security,

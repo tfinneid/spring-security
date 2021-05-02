@@ -23,7 +23,7 @@ import org.bouncycastle.crypto.params.Argon2Parameters;
 
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoderNew;
 
 /**
  * <p>
@@ -44,8 +44,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @author Simeon Macke
  * @since 5.3
  */
-@Deprecated
-public class Argon2PasswordEncoder implements PasswordEncoder {
+public class Argon2PasswordEncoderNew implements PasswordEncoderNew {
 
 	private static final int DEFAULT_SALT_LENGTH = 16;
 
@@ -69,11 +68,11 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 
 	private final BytesKeyGenerator saltGenerator;
 
-	public Argon2PasswordEncoder() {
+	public Argon2PasswordEncoderNew() {
 		this(DEFAULT_SALT_LENGTH, DEFAULT_HASH_LENGTH, DEFAULT_PARALLELISM, DEFAULT_MEMORY, DEFAULT_ITERATIONS);
 	}
 
-	public Argon2PasswordEncoder(int saltLength, int hashLength, int parallelism, int memory, int iterations) {
+	public Argon2PasswordEncoderNew(int saltLength, int hashLength, int parallelism, int memory, int iterations) {
 		this.hashLength = hashLength;
 		this.parallelism = parallelism;
 		this.memory = memory;
@@ -82,7 +81,7 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 	}
 
 	@Override
-	public String encode(CharSequence rawPassword) {
+	public String encode(char[] rawPassword) {
 		byte[] salt = this.saltGenerator.generateKey();
 		byte[] hash = new byte[this.hashLength];
 		// @formatter:off
@@ -96,12 +95,12 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 		// @formatter:on
 		Argon2BytesGenerator generator = new Argon2BytesGenerator();
 		generator.init(params);
-		generator.generateBytes(rawPassword.toString().toCharArray(), hash);
+		generator.generateBytes(rawPassword, hash);
 		return Argon2EncodingUtils.encode(hash, params);
 	}
 
 	@Override
-	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		if (encodedPassword == null) {
 			this.logger.warn("password hash is null");
 			return false;
@@ -117,7 +116,7 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 		byte[] hashBytes = new byte[decoded.getHash().length];
 		Argon2BytesGenerator generator = new Argon2BytesGenerator();
 		generator.init(decoded.getParameters());
-		generator.generateBytes(rawPassword.toString().toCharArray(), hashBytes);
+		generator.generateBytes(rawPassword, hashBytes);
 		return constantTimeArrayEquals(decoded.getHash(), hashBytes);
 	}
 
