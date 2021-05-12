@@ -37,11 +37,19 @@ public final class Utf8 {
 	}
 
 	/**
-	 * Get the bytes of the String in UTF-8 encoded form.
+	 * WARNING: This method should not be used for passwords, see {@link #encode(char[])}
+	 * for encoding passwords.
 	 */
-	public static byte[] encode(CharSequence string) {
+	public static byte[] encode(String text) {
+		return encode(text.toCharArray());
+	}
+
+	/**
+	 * Get the bytes of a string in UTF-8 encoded form.
+	 */
+	public static byte[] encode(char[] text) {
 		try {
-			ByteBuffer bytes = CHARSET.newEncoder().encode(CharBuffer.wrap(string));
+			ByteBuffer bytes = CHARSET.newEncoder().encode(CharBuffer.wrap(text));
 			byte[] bytesCopy = new byte[bytes.limit()];
 			System.arraycopy(bytes.array(), 0, bytesCopy, 0, bytes.limit());
 			return bytesCopy;

@@ -14,6 +14,8 @@
 
 package org.springframework.security.crypto.bcrypt;
 
+import org.springframework.security.crypto.codec.Utf8;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -569,12 +571,17 @@ public class BCrypt {
 	 * @param salt the salt to hash with (perhaps generated using BCrypt.gensalt)
 	 * @return the hashed password
 	 */
-	public static String hashpw(String password, String salt) {
+	public static String hashpw(char[] password, String salt) {
 		byte passwordb[];
 
-		passwordb = password.getBytes(StandardCharsets.UTF_8);
+		passwordb = Utf8.encode(password);
 
 		return hashpw(passwordb, salt);
+	}
+
+	@Deprecated
+	public static String hashpw(String password, String salt) {
+		return hashpw(password.toCharArray(), salt);
 	}
 
 	/**
@@ -739,8 +746,13 @@ public class BCrypt {
 	 * @param hashed the previously-hashed password
 	 * @return true if the passwords match, false otherwise
 	 */
-	public static boolean checkpw(String plaintext, String hashed) {
+	public static boolean checkpw(char[] plaintext, String hashed) {
 		return equalsNoEarlyReturn(hashed, hashpw(plaintext, hashed));
+	}
+
+	@Deprecated
+	public static boolean checkpw(String plaintext, String hashed) {
+		return checkpw(plaintext.toCharArray(), hashed);
 	}
 
 	/**

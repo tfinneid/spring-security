@@ -80,8 +80,12 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 		this.saltGenerator = KeyGenerators.secureRandom(saltLength);
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
+		return encode(rawPassword.toString().toCharArray());
+	}
+
+	@Override
+	public String encode(char[] rawPassword) {
 		byte[] salt = this.saltGenerator.generateKey();
 		byte[] hash = new byte[this.hashLength];
 		// @formatter:off
@@ -95,12 +99,16 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 		// @formatter:on
 		Argon2BytesGenerator generator = new Argon2BytesGenerator();
 		generator.init(params);
-		generator.generateBytes(rawPassword.toString().toCharArray(), hash);
+		generator.generateBytes(rawPassword, hash);
 		return Argon2EncodingUtils.encode(hash, params);
 	}
 
-	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		if (encodedPassword == null) {
 			this.logger.warn("password hash is null");
 			return false;
@@ -116,7 +124,7 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
 		byte[] hashBytes = new byte[decoded.getHash().length];
 		Argon2BytesGenerator generator = new Argon2BytesGenerator();
 		generator.init(decoded.getParameters());
-		generator.generateBytes(rawPassword.toString().toCharArray(), hashBytes);
+		generator.generateBytes(rawPassword, hashBytes);
 		return constantTimeArrayEquals(decoded.getHash(), hashBytes);
 	}
 

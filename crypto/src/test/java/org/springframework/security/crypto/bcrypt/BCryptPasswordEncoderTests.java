@@ -199,13 +199,13 @@ public class BCryptPasswordEncoderTests {
 	@Test
 	public void encodeNullRawPassword() {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		assertThatIllegalArgumentException().isThrownBy(() -> encoder.encode(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> encoder.encode((String) null));
 	}
 
 	@Test
 	public void matchNullRawPassword() {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		assertThatIllegalArgumentException().isThrownBy(() -> encoder.matches(null, "does-not-matter"));
+		assertThatIllegalArgumentException().isThrownBy(() -> encoder.matches((String) null, "does-not-matter"));
 	}
 
 }

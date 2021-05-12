@@ -33,18 +33,18 @@ public class PasswordEncoderUtilsTests {
 
 	@Test
 	public void equalsWhenNullAndNotEmtpyThenFalse() {
-		assertThat(PasswordEncoderUtils.equals(null, "a")).isFalse();
+		assertThat(PasswordEncoderUtils.equals((String) null, "a")).isFalse();
 		assertThat(PasswordEncoderUtils.equals("a", null)).isFalse();
 	}
 
 	@Test
 	public void equalsWhenNullAndNullThenTrue() {
-		assertThat(PasswordEncoderUtils.equals(null, null)).isTrue();
+		assertThat(PasswordEncoderUtils.equals((String) null, null)).isTrue();
 	}
 
 	@Test
 	public void equalsWhenNullAndEmptyThenFalse() {
-		assertThat(PasswordEncoderUtils.equals(null, "")).isFalse();
+		assertThat(PasswordEncoderUtils.equals((String) null, "")).isFalse();
 		assertThat(PasswordEncoderUtils.equals("", null)).isFalse();
 	}
 

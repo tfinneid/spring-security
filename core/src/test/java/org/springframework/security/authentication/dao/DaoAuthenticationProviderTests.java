@@ -267,9 +267,9 @@ public class DaoAuthenticationProviderTests {
 		provider.setUserDetailsService(userDetailsService);
 		provider.setUserDetailsPasswordService(passwordManager);
 		UserDetails user = PasswordEncodedUser.user();
-		given(encoder.matches(any(), any())).willReturn(true);
+		given(encoder.matches(anyString(), any())).willReturn(true);
 		given(encoder.upgradeEncoding(any())).willReturn(true);
-		given(encoder.encode(any())).willReturn(encodedPassword);
+		given(encoder.encode(anyString())).willReturn(encodedPassword);
 		given(userDetailsService.loadUserByUsername(any())).willReturn(user);
 		given(passwordManager.updatePassword(any(), any())).willReturn(user);
 		Authentication result = provider.authenticate(token);
@@ -288,7 +288,7 @@ public class DaoAuthenticationProviderTests {
 		provider.setUserDetailsService(userDetailsService);
 		provider.setUserDetailsPasswordService(passwordManager);
 		UserDetails user = PasswordEncodedUser.user();
-		given(encoder.matches(any(), any())).willReturn(false);
+		given(encoder.matches(anyString(), any())).willReturn(false);
 		given(userDetailsService.loadUserByUsername(any())).willReturn(user);
 		assertThatExceptionOfType(BadCredentialsException.class).isThrownBy(() -> provider.authenticate(token));
 		verifyZeroInteractions(passwordManager);
@@ -305,7 +305,7 @@ public class DaoAuthenticationProviderTests {
 		provider.setUserDetailsService(userDetailsService);
 		provider.setUserDetailsPasswordService(passwordManager);
 		UserDetails user = PasswordEncodedUser.user();
-		given(encoder.matches(any(), any())).willReturn(true);
+		given(encoder.matches(anyString(), any())).willReturn(true);
 		given(encoder.upgradeEncoding(any())).willReturn(false);
 		given(userDetailsService.loadUserByUsername(any())).willReturn(user);
 		Authentication result = provider.authenticate(token);

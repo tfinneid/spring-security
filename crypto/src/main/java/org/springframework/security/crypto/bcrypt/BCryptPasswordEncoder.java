@@ -101,13 +101,20 @@ public class BCryptPasswordEncoder implements PasswordEncoder {
 		this.random = random;
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
 		if (rawPassword == null) {
 			throw new IllegalArgumentException("rawPassword cannot be null");
 		}
+		return encode(rawPassword.toString().toCharArray());
+	}
+
+	@Override
+	public String encode(char[] rawPassword) {
+		if (rawPassword == null) {
+			throw new IllegalArgumentException("rawPassword cannot be null");
+		}
 		String salt = getSalt();
-		return BCrypt.hashpw(rawPassword.toString(), salt);
+		return BCrypt.hashpw(rawPassword, salt);
 	}
 
 	private String getSalt() {
@@ -117,8 +124,15 @@ public class BCryptPasswordEncoder implements PasswordEncoder {
 		return BCrypt.gensalt(this.version.getVersion(), this.strength);
 	}
 
-	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		if (rawPassword == null) {
+			throw new IllegalArgumentException("rawPassword cannot be null");
+		}
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		if (rawPassword == null) {
 			throw new IllegalArgumentException("rawPassword cannot be null");
 		}
@@ -130,7 +144,7 @@ public class BCryptPasswordEncoder implements PasswordEncoder {
 			this.logger.warn("Encoded password does not look like BCrypt");
 			return false;
 		}
-		return BCrypt.checkpw(rawPassword.toString(), encodedPassword);
+		return BCrypt.checkpw(rawPassword, encodedPassword);
 	}
 
 	@Override

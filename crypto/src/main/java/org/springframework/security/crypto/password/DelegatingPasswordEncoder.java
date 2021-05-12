@@ -109,8 +109,8 @@ import java.util.Map;
  * {@link PasswordEncoder} provided in the constructor. Our example in "Password Storage
  * Format" provides a working example of how this is done.
  *
- * By default the result of invoking {@link #matches(CharSequence, String)} with a
- * password with an "id" that is not mapped (including a null id) will result in an
+ * By default the result of invoking {@link #matches(char[], String)} with a password with
+ * an "id" that is not mapped (including a null id) will result in an
  * {@link IllegalArgumentException}. This behavior can be customized using
  * {@link #setDefaultPasswordEncoderForMatches(PasswordEncoder)}.
  *
@@ -136,10 +136,9 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 	/**
 	 * Creates a new instance
 	 * @param idForEncode the id used to lookup which {@link PasswordEncoder} should be
-	 * used for {@link #encode(CharSequence)}
+	 * used for {@link #encode(char[])}
 	 * @param idToPasswordEncoder a Map of id to {@link PasswordEncoder} used to determine
-	 * which {@link PasswordEncoder} should be used for
-	 * {@link #matches(CharSequence, String)}
+	 * which {@link PasswordEncoder} should be used for {@link #matches(char[], String)}
 	 */
 	public DelegatingPasswordEncoder(String idForEncode, Map<String, PasswordEncoder> idToPasswordEncoder) {
 		if (idForEncode == null) {
@@ -167,7 +166,7 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 
 	/**
 	 * Sets the {@link PasswordEncoder} to delegate to for
-	 * {@link #matches(CharSequence, String)} if the id is not mapped to a
+	 * {@link #matches(char[], String)} if the id is not mapped to a
 	 * {@link PasswordEncoder}.
 	 *
 	 * <p>
@@ -186,13 +185,24 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 		this.defaultPasswordEncoderForMatches = defaultPasswordEncoderForMatches;
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
-		return PREFIX + this.idForEncode + SUFFIX + this.passwordEncoderForEncode.encode(rawPassword);
+		if (rawPassword == null) {
+			throw new IllegalArgumentException("rawPassword cannot be null");
+		}
+		return encode(rawPassword.toString().toCharArray());
 	}
 
 	@Override
-	public boolean matches(CharSequence rawPassword, String prefixEncodedPassword) {
+	public String encode(char[] rawPassword) {
+		return PREFIX + this.idForEncode + SUFFIX + this.passwordEncoderForEncode.encode(rawPassword);
+	}
+
+	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String prefixEncodedPassword) {
 		if (rawPassword == null && prefixEncodedPassword == null) {
 			return true;
 		}
@@ -243,13 +253,25 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 	 */
 	private class UnmappedIdPasswordEncoder implements PasswordEncoder {
 
+		@Deprecated
 		@Override
 		public String encode(CharSequence rawPassword) {
-			throw new UnsupportedOperationException("encode is not supported");
+			return encode(rawPassword.toString().toCharArray());
 		}
 
 		@Override
-		public boolean matches(CharSequence rawPassword, String prefixEncodedPassword) {
+		public String encode(char[] rawPassword) {
+			throw new UnsupportedOperationException("encode is not supported");
+		}
+
+		@Deprecated
+		@Override
+		public boolean matches(CharSequence rawPassword, String encodedPassword) {
+			return matches(rawPassword.toString().toCharArray(), encodedPassword);
+		}
+
+		@Override
+		public boolean matches(char[] rawPassword, String prefixEncodedPassword) {
 			String id = extractId(prefixEncodedPassword);
 			throw new IllegalArgumentException("There is no PasswordEncoder mapped for the id \"" + id + "\"");
 		}

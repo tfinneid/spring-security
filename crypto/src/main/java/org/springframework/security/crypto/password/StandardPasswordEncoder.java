@@ -62,7 +62,7 @@ public final class StandardPasswordEncoder implements PasswordEncoder {
 	 * Constructs a standard password encoder with no additional secret value.
 	 */
 	public StandardPasswordEncoder() {
-		this("");
+		this("".toCharArray());
 	}
 
 	/**
@@ -70,34 +70,47 @@ public final class StandardPasswordEncoder implements PasswordEncoder {
 	 * in the password hash.
 	 * @param secret the secret key used in the encoding process (should not be shared)
 	 */
-	public StandardPasswordEncoder(CharSequence secret) {
+	public StandardPasswordEncoder(char[] secret) {
 		this("SHA-256", secret);
 	}
 
-	@Override
+	@Deprecated
+	public StandardPasswordEncoder(CharSequence secret) {
+		this(secret.toString().toCharArray());
+	}
+
 	public String encode(CharSequence rawPassword) {
-		return encode(rawPassword, this.saltGenerator.generateKey());
+		return encode(rawPassword.toString().toCharArray());
 	}
 
 	@Override
+	public String encode(char[] rawPassword) {
+		return encode(rawPassword, this.saltGenerator.generateKey());
+	}
+
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		byte[] digested = decode(encodedPassword);
 		byte[] salt = EncodingUtils.subArray(digested, 0, this.saltGenerator.getKeyLength());
 		return MessageDigest.isEqual(digested, digest(rawPassword, salt));
 	}
 
-	private StandardPasswordEncoder(String algorithm, CharSequence secret) {
+	private StandardPasswordEncoder(String algorithm, char[] secret) {
 		this.digester = new Digester(algorithm, DEFAULT_ITERATIONS);
 		this.secret = Utf8.encode(secret);
 		this.saltGenerator = KeyGenerators.secureRandom();
 	}
 
-	private String encode(CharSequence rawPassword, byte[] salt) {
+	private String encode(char[] rawPassword, byte[] salt) {
 		byte[] digest = digest(rawPassword, salt);
 		return new String(Hex.encode(digest));
 	}
 
-	private byte[] digest(CharSequence rawPassword, byte[] salt) {
+	private byte[] digest(char[] rawPassword, byte[] salt) {
 		byte[] digest = this.digester.digest(EncodingUtils.concatenate(salt, this.secret, Utf8.encode(rawPassword)));
 		return EncodingUtils.concatenate(salt, digest);
 	}

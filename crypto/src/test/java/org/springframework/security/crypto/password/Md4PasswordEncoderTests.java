@@ -41,14 +41,14 @@ public class Md4PasswordEncoderTests {
 	public void testEncodeNullPassword() {
 		Md4PasswordEncoder md4 = new Md4PasswordEncoder();
 		md4.setEncodeHashAsBase64(true);
-		assertThat(md4.matches(null, "MdbP4NFq6TG3PFnX4MCJwA==")).isTrue();
+		assertThat(md4.matches((String) null, "MdbP4NFq6TG3PFnX4MCJwA==")).isTrue();
 	}
 
 	@Test
 	public void testEncodeEmptyPassword() {
 		Md4PasswordEncoder md4 = new Md4PasswordEncoder();
 		md4.setEncodeHashAsBase64(true);
-		assertThat(md4.matches(null, "MdbP4NFq6TG3PFnX4MCJwA==")).isTrue();
+		assertThat(md4.matches((String) null, "MdbP4NFq6TG3PFnX4MCJwA==")).isTrue();
 	}
 
 	@Test

@@ -36,23 +36,31 @@ public abstract class AbstractPasswordEncoder implements PasswordEncoder {
 		this.saltGenerator = KeyGenerators.secureRandom();
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
+		return encode(rawPassword.toString().toCharArray());
+	}
+
+	@Override
+	public String encode(char[] rawPassword) {
 		byte[] salt = this.saltGenerator.generateKey();
 		byte[] encoded = encodeAndConcatenate(rawPassword, salt);
 		return String.valueOf(Hex.encode(encoded));
 	}
 
-	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		byte[] digested = Hex.decode(encodedPassword);
 		byte[] salt = EncodingUtils.subArray(digested, 0, this.saltGenerator.getKeyLength());
 		return matches(digested, encodeAndConcatenate(rawPassword, salt));
 	}
 
-	protected abstract byte[] encode(CharSequence rawPassword, byte[] salt);
+	protected abstract byte[] encode(char[] rawPassword, byte[] salt);
 
-	protected byte[] encodeAndConcatenate(CharSequence rawPassword, byte[] salt) {
+	protected byte[] encodeAndConcatenate(char[] rawPassword, byte[] salt) {
 		return EncodingUtils.concatenate(salt, encode(rawPassword, salt));
 	}
 

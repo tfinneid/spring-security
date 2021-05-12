@@ -92,6 +92,10 @@ public class Md4PasswordEncoder implements PasswordEncoder {
 		this.encodeHashAsBase64 = encodeHashAsBase64;
 	}
 
+	public String encode(CharSequence rawPassword) {
+		return encode(rawPassword.toString().toCharArray());
+	}
+
 	/**
 	 * Encodes the rawPass using a MessageDigest. If a salt is specified it will be merged
 	 * with the password before encoding.
@@ -100,16 +104,13 @@ public class Md4PasswordEncoder implements PasswordEncoder {
 	 * encodeHashAsBase64 is enabled.
 	 */
 	@Override
-	public String encode(CharSequence rawPassword) {
+	public String encode(char[] rawPassword) {
 		String salt = PREFIX + this.saltGenerator.generateKey() + SUFFIX;
 		return digest(salt, rawPassword);
 	}
 
-	private String digest(String salt, CharSequence rawPassword) {
-		if (rawPassword == null) {
-			rawPassword = "";
-		}
-		String saltedPassword = rawPassword + salt;
+	private String digest(String salt, char[] rawPassword) {
+		char[] saltedPassword = PasswordUtil.createSaltedPassword(salt, rawPassword);
 		byte[] saltedPasswordBytes = Utf8.encode(saltedPassword);
 		Md4 md4 = new Md4();
 		md4.update(saltedPasswordBytes, 0, saltedPasswordBytes.length);
@@ -125,6 +126,11 @@ public class Md4PasswordEncoder implements PasswordEncoder {
 		return new String(Hex.encode(digest));
 	}
 
+	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		char[] pw = (rawPassword != null) ? rawPassword.toString().toCharArray() : null;
+		return matches(pw, encodedPassword);
+	}
+
 	/**
 	 * Takes a previously encoded password and compares it with a rawpassword after mixing
 	 * in the salt and encoding that value
@@ -133,7 +139,7 @@ public class Md4PasswordEncoder implements PasswordEncoder {
 	 * @return true or false
 	 */
 	@Override
-	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		String salt = extractSalt(encodedPassword);
 		String rawPasswordEncoded = digest(salt, rawPassword);
 		return PasswordEncoderUtils.equals(encodedPassword.toString(), rawPasswordEncoded);

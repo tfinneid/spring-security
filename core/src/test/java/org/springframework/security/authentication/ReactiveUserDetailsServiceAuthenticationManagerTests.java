@@ -35,6 +35,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 /**
@@ -119,7 +120,7 @@ public class ReactiveUserDetailsServiceAuthenticationManagerTests {
 	@Test
 	public void authenticateWhenPasswordEncoderAndSuccessThenSuccess() {
 		this.manager.setPasswordEncoder(this.passwordEncoder);
-		given(this.passwordEncoder.matches(any(), any())).willReturn(true);
+		given(this.passwordEncoder.matches(anyString(), any())).willReturn(true);
 		User user = new User(this.username, this.password, AuthorityUtils.createAuthorityList("ROLE_USER"));
 		given(this.repository.findByUsername(user.getUsername())).willReturn(Mono.just(user));
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(this.username,
@@ -131,7 +132,7 @@ public class ReactiveUserDetailsServiceAuthenticationManagerTests {
 	@Test
 	public void authenticateWhenPasswordEncoderAndFailThenFail() {
 		this.manager.setPasswordEncoder(this.passwordEncoder);
-		given(this.passwordEncoder.matches(any(), any())).willReturn(false);
+		given(this.passwordEncoder.matches(anyString(), any())).willReturn(false);
 		User user = new User(this.username, this.password, AuthorityUtils.createAuthorityList("ROLE_USER"));
 		given(this.repository.findByUsername(user.getUsername())).willReturn(Mono.just(user));
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(this.username,

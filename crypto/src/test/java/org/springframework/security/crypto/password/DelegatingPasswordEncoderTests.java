@@ -94,29 +94,29 @@ public class DelegatingPasswordEncoderTests {
 		String encodedPassword = "{unmapped}" + this.rawPassword;
 		this.passwordEncoder.setDefaultPasswordEncoderForMatches(this.invalidId);
 		assertThat(this.passwordEncoder.matches(this.rawPassword, encodedPassword)).isFalse();
-		verify(this.invalidId).matches(this.rawPassword, encodedPassword);
+		verify(this.invalidId).matches(this.rawPassword.toCharArray(), encodedPassword);
 		verifyZeroInteractions(this.bcrypt, this.noop);
 	}
 
 	@Test
 	public void encodeWhenValidThenUsesIdForEncode() {
-		given(this.bcrypt.encode(this.rawPassword)).willReturn(this.encodedPassword);
+		given(this.bcrypt.encode(this.rawPassword.toCharArray())).willReturn(this.encodedPassword);
 		assertThat(this.passwordEncoder.encode(this.rawPassword)).isEqualTo(this.bcryptEncodedPassword);
 	}
 
 	@Test
 	public void matchesWhenBCryptThenDelegatesToBCrypt() {
-		given(this.bcrypt.matches(this.rawPassword, this.encodedPassword)).willReturn(true);
+		given(this.bcrypt.matches(this.rawPassword.toCharArray(), this.encodedPassword)).willReturn(true);
 		assertThat(this.passwordEncoder.matches(this.rawPassword, this.bcryptEncodedPassword)).isTrue();
-		verify(this.bcrypt).matches(this.rawPassword, this.encodedPassword);
+		verify(this.bcrypt).matches(this.rawPassword.toCharArray(), this.encodedPassword);
 		verifyZeroInteractions(this.noop);
 	}
 
 	@Test
 	public void matchesWhenNoopThenDelegatesToNoop() {
-		given(this.noop.matches(this.rawPassword, this.encodedPassword)).willReturn(true);
+		given(this.noop.matches(this.rawPassword.toCharArray(), this.encodedPassword)).willReturn(true);
 		assertThat(this.passwordEncoder.matches(this.rawPassword, this.noopEncodedPassword)).isTrue();
-		verify(this.noop).matches(this.rawPassword, this.encodedPassword);
+		verify(this.noop).matches(this.rawPassword.toCharArray(), this.encodedPassword);
 		verifyZeroInteractions(this.bcrypt);
 	}
 
@@ -176,9 +176,9 @@ public class DelegatingPasswordEncoderTests {
 	public void matchesWhenNullIdThenDelegatesToInvalidId() {
 		this.delegates.put(null, this.invalidId);
 		this.passwordEncoder = new DelegatingPasswordEncoder(this.bcryptId, this.delegates);
-		given(this.invalidId.matches(this.rawPassword, this.encodedPassword)).willReturn(true);
-		assertThat(this.passwordEncoder.matches(this.rawPassword, this.encodedPassword)).isTrue();
-		verify(this.invalidId).matches(this.rawPassword, this.encodedPassword);
+		given(this.invalidId.matches(this.rawPassword.toCharArray(), this.encodedPassword)).willReturn(true);
+		assertThat(this.passwordEncoder.matches(this.rawPassword.toCharArray(), this.encodedPassword)).isTrue();
+		verify(this.invalidId).matches(this.rawPassword.toCharArray(), this.encodedPassword);
 		verifyZeroInteractions(this.bcrypt, this.noop);
 	}
 

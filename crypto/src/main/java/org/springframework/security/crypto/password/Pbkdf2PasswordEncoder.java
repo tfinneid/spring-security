@@ -76,7 +76,7 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 	 * added. Users should tune password verification to their own systems.
 	 */
 	public Pbkdf2PasswordEncoder() {
-		this("");
+		this("".toCharArray());
 	}
 
 	/**
@@ -86,8 +86,13 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 	 * {@value #DEFAULT_HASH_WIDTH} bits.
 	 * @param secret the secret key used in the encoding process (should not be shared)
 	 */
-	public Pbkdf2PasswordEncoder(CharSequence secret) {
+	public Pbkdf2PasswordEncoder(char[] secret) {
 		this(secret, DEFAULT_SALT_LENGTH, DEFAULT_ITERATIONS, DEFAULT_HASH_WIDTH);
+	}
+
+	@Deprecated
+	public Pbkdf2PasswordEncoder(CharSequence secret) {
+		this(secret.toString().toCharArray());
 	}
 
 	/**
@@ -98,8 +103,13 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 	 * @param saltLength the salt length (in bytes)
 	 * @since 5.5
 	 */
-	public Pbkdf2PasswordEncoder(CharSequence secret, int saltLength) {
+	public Pbkdf2PasswordEncoder(char[] secret, int saltLength) {
 		this(secret, saltLength, DEFAULT_ITERATIONS, DEFAULT_HASH_WIDTH);
+	}
+
+	@Deprecated
+	public Pbkdf2PasswordEncoder(CharSequence secret, int saltLength) {
+		this(secret.toString().toCharArray(), saltLength);
 	}
 
 	/**
@@ -110,8 +120,12 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 	 * seconds on their own system.
 	 * @param hashWidth the size of the hash (in bits)
 	 */
-	public Pbkdf2PasswordEncoder(CharSequence secret, int iterations, int hashWidth) {
+	public Pbkdf2PasswordEncoder(char[] secret, int iterations, int hashWidth) {
 		this(secret, DEFAULT_SALT_LENGTH, iterations, hashWidth);
+	}
+
+	public Pbkdf2PasswordEncoder(CharSequence secret, int iterations, int hashWidth) {
+		this(secret.toString().toCharArray(), iterations, hashWidth);
 	}
 
 	/**
@@ -124,11 +138,15 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 	 * @param hashWidth the size of the hash (in bits)
 	 * @since 5.5
 	 */
-	public Pbkdf2PasswordEncoder(CharSequence secret, int saltLength, int iterations, int hashWidth) {
+	public Pbkdf2PasswordEncoder(char[] secret, int saltLength, int iterations, int hashWidth) {
 		this.secret = Utf8.encode(secret);
 		this.saltGenerator = KeyGenerators.secureRandom(saltLength);
 		this.iterations = iterations;
 		this.hashWidth = hashWidth;
+	}
+
+	public Pbkdf2PasswordEncoder(CharSequence secret, int saltLength, int iterations, int hashWidth) {
+		this(secret.toString().toCharArray(), saltLength, iterations, hashWidth);
 	}
 
 	/**
@@ -165,8 +183,12 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 		this.encodeHashAsBase64 = encodeHashAsBase64;
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
+		return encode(rawPassword.toString().toCharArray());
+	}
+
+	@Override
+	public String encode(char[] rawPassword) {
 		byte[] salt = this.saltGenerator.generateKey();
 		byte[] encoded = encode(rawPassword, salt);
 		return encode(encoded);
@@ -179,8 +201,12 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 		return String.valueOf(Hex.encode(bytes));
 	}
 
-	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		byte[] digested = decode(encodedPassword);
 		byte[] salt = EncodingUtils.subArray(digested, 0, this.saltGenerator.getKeyLength());
 		return MessageDigest.isEqual(digested, encode(rawPassword, salt));
@@ -193,10 +219,10 @@ public class Pbkdf2PasswordEncoder implements PasswordEncoder {
 		return Hex.decode(encodedBytes);
 	}
 
-	private byte[] encode(CharSequence rawPassword, byte[] salt) {
+	private byte[] encode(char[] rawPassword, byte[] salt) {
 		try {
-			PBEKeySpec spec = new PBEKeySpec(rawPassword.toString().toCharArray(),
-					EncodingUtils.concatenate(salt, this.secret), this.iterations, this.hashWidth);
+			PBEKeySpec spec = new PBEKeySpec(rawPassword, EncodingUtils.concatenate(salt, this.secret), this.iterations,
+					this.hashWidth);
 			SecretKeyFactory skf = SecretKeyFactory.getInstance(this.algorithm);
 			return EncodingUtils.concatenate(salt, skf.generateSecret(spec).getEncoded());
 		}

@@ -81,6 +81,10 @@ public class LdapShaPasswordEncoder implements PasswordEncoder {
 		return hashAndSalt;
 	}
 
+	public String encode(CharSequence rawPassword) {
+		return encode(rawPassword.toString().toCharArray());
+	}
+
 	/**
 	 * Calculates the hash of password (and salt bytes, if supplied) and returns a base64
 	 * encoded concatenation of the hash and salt, prefixed with {SHA} (or {SSHA} if salt
@@ -90,12 +94,12 @@ public class LdapShaPasswordEncoder implements PasswordEncoder {
 	 *
 	 */
 	@Override
-	public String encode(CharSequence rawPass) {
+	public String encode(char[] rawPass) {
 		byte[] salt = this.saltGenerator.generateKey();
 		return encode(rawPass, salt);
 	}
 
-	private String encode(CharSequence rawPassword, byte[] salt) {
+	private String encode(char[] rawPassword, byte[] salt) {
 		MessageDigest sha = getSha(rawPassword);
 		if (salt != null) {
 			sha.update(salt);
@@ -105,7 +109,7 @@ public class LdapShaPasswordEncoder implements PasswordEncoder {
 		return prefix + Utf8.decode(Base64.getEncoder().encode(hash));
 	}
 
-	private MessageDigest getSha(CharSequence rawPassword) {
+	private MessageDigest getSha(char[] rawPassword) {
 		try {
 			MessageDigest sha = MessageDigest.getInstance("SHA");
 			sha.update(Utf8.encode(rawPassword));
@@ -132,6 +136,10 @@ public class LdapShaPasswordEncoder implements PasswordEncoder {
 		return salt;
 	}
 
+	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
 	/**
 	 * Checks the validity of an unencoded password against an encoded one in the form
 	 * "{SSHA}sQuQF8vj8Eg2Y1hPdh3bkQhCKQBgjhQI".
@@ -140,19 +148,19 @@ public class LdapShaPasswordEncoder implements PasswordEncoder {
 	 * @return true if they match (independent of the case of the prefix).
 	 */
 	@Override
-	public boolean matches(CharSequence rawPassword, String encodedPassword) {
-		return matches((rawPassword != null) ? rawPassword.toString() : null, encodedPassword);
+	public boolean matches(char[] rawPassword, String encodedPassword) {
+		return doMatch((rawPassword != null) ? rawPassword : null, encodedPassword);
 	}
 
-	private boolean matches(String rawPassword, String encodedPassword) {
+	private boolean doMatch(char[] rawPassword, String encodedPassword) {
 		String prefix = extractPrefix(encodedPassword);
 		if (prefix == null) {
-			return PasswordEncoderUtils.equals(encodedPassword, rawPassword);
+			return PasswordEncoderUtils.equals(rawPassword, encodedPassword);
 		}
 		byte[] salt = getSalt(encodedPassword, prefix);
 		int startOfHash = prefix.length();
 		String encodedRawPass = encode(rawPassword, salt).substring(startOfHash);
-		return PasswordEncoderUtils.equals(encodedRawPass, encodedPassword.substring(startOfHash));
+		return PasswordEncoderUtils.equals(encodedRawPass.toCharArray(), encodedPassword.substring(startOfHash));
 	}
 
 	private byte[] getSalt(String encodedPassword, String prefix) {

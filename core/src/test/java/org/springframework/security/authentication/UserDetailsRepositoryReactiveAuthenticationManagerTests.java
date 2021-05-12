@@ -37,6 +37,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -92,7 +93,7 @@ public class UserDetailsRepositoryReactiveAuthenticationManagerTests {
 	@Test
 	public void authentiateWhenCustomSchedulerThenUsed() {
 		given(this.userDetailsService.findByUsername(any())).willReturn(Mono.just(this.user));
-		given(this.encoder.matches(any(), any())).willReturn(true);
+		given(this.encoder.matches(anyString(), any())).willReturn(true);
 		this.manager.setScheduler(this.scheduler);
 		this.manager.setPasswordEncoder(this.encoder);
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(this.user,
@@ -105,9 +106,9 @@ public class UserDetailsRepositoryReactiveAuthenticationManagerTests {
 	public void authenticateWhenPasswordServiceThenUpdated() {
 		String encodedPassword = "encoded";
 		given(this.userDetailsService.findByUsername(any())).willReturn(Mono.just(this.user));
-		given(this.encoder.matches(any(), any())).willReturn(true);
+		given(this.encoder.matches(anyString(), any())).willReturn(true);
 		given(this.encoder.upgradeEncoding(any())).willReturn(true);
-		given(this.encoder.encode(any())).willReturn(encodedPassword);
+		given(this.encoder.encode(anyString())).willReturn(encodedPassword);
 		given(this.userDetailsPasswordService.updatePassword(any(), any())).willReturn(Mono.just(this.user));
 		this.manager.setPasswordEncoder(this.encoder);
 		this.manager.setUserDetailsPasswordService(this.userDetailsPasswordService);
@@ -121,7 +122,7 @@ public class UserDetailsRepositoryReactiveAuthenticationManagerTests {
 	@Test
 	public void authenticateWhenPasswordServiceAndBadCredentialsThenNotUpdated() {
 		given(this.userDetailsService.findByUsername(any())).willReturn(Mono.just(this.user));
-		given(this.encoder.matches(any(), any())).willReturn(false);
+		given(this.encoder.matches(anyString(), any())).willReturn(false);
 		this.manager.setPasswordEncoder(this.encoder);
 		this.manager.setUserDetailsPasswordService(this.userDetailsPasswordService);
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(this.user,
@@ -134,7 +135,7 @@ public class UserDetailsRepositoryReactiveAuthenticationManagerTests {
 	@Test
 	public void authenticateWhenPasswordServiceAndUpgradeFalseThenNotUpdated() {
 		given(this.userDetailsService.findByUsername(any())).willReturn(Mono.just(this.user));
-		given(this.encoder.matches(any(), any())).willReturn(true);
+		given(this.encoder.matches(anyString(), any())).willReturn(true);
 		given(this.encoder.upgradeEncoding(any())).willReturn(false);
 		this.manager.setPasswordEncoder(this.encoder);
 		this.manager.setUserDetailsPasswordService(this.userDetailsPasswordService);
@@ -148,7 +149,7 @@ public class UserDetailsRepositoryReactiveAuthenticationManagerTests {
 	public void authenticateWhenPostAuthenticationChecksFail() {
 		given(this.userDetailsService.findByUsername(any())).willReturn(Mono.just(this.user));
 		willThrow(new LockedException("account is locked")).given(this.postAuthenticationChecks).check(any());
-		given(this.encoder.matches(any(), any())).willReturn(true);
+		given(this.encoder.matches(anyString(), any())).willReturn(true);
 		this.manager.setPasswordEncoder(this.encoder);
 		this.manager.setPostAuthenticationChecks(this.postAuthenticationChecks);
 		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> this.manager
@@ -160,7 +161,7 @@ public class UserDetailsRepositoryReactiveAuthenticationManagerTests {
 	@Test
 	public void authenticateWhenPostAuthenticationChecksNotSet() {
 		given(this.userDetailsService.findByUsername(any())).willReturn(Mono.just(this.user));
-		given(this.encoder.matches(any(), any())).willReturn(true);
+		given(this.encoder.matches(anyString(), any())).willReturn(true);
 		this.manager.setPasswordEncoder(this.encoder);
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(this.user,
 				this.user.getPassword());

@@ -587,11 +587,21 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 
 		@Override
 		public String encode(CharSequence rawPassword) {
+			return encode(rawPassword.toString().toCharArray());
+		}
+
+		@Override
+		public String encode(char[] rawPassword) {
 			return getPasswordEncoder().encode(rawPassword);
 		}
 
 		@Override
 		public boolean matches(CharSequence rawPassword, String encodedPassword) {
+			return matches(rawPassword.toString().toCharArray(), encodedPassword);
+		}
+
+		@Override
+		public boolean matches(char[] rawPassword, String encodedPassword) {
 			return getPasswordEncoder().matches(rawPassword, encodedPassword);
 		}
 

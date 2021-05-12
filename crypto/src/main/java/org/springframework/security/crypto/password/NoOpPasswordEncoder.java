@@ -16,6 +16,8 @@
 
 package org.springframework.security.crypto.password;
 
+import java.util.Arrays;
+
 /**
  * This {@link PasswordEncoder} is provided for legacy and testing purposes only and is
  * not considered secure.
@@ -38,14 +40,23 @@ public final class NoOpPasswordEncoder implements PasswordEncoder {
 	private NoOpPasswordEncoder() {
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
 		return rawPassword.toString();
 	}
 
 	@Override
+	public String encode(char[] rawPassword) {
+		return new String(rawPassword);
+	}
+
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
-		return rawPassword.toString().equals(encodedPassword);
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
+		char[] encodedArray = (encodedPassword != null) ? encodedPassword.toCharArray() : null;
+		return Arrays.equals(rawPassword, encodedArray);
 	}
 
 	/**

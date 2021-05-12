@@ -116,13 +116,21 @@ public class SCryptPasswordEncoder implements PasswordEncoder {
 		this.saltGenerator = KeyGenerators.secureRandom(saltLength);
 	}
 
-	@Override
 	public String encode(CharSequence rawPassword) {
-		return digest(rawPassword, this.saltGenerator.generateKey());
+		return encode(rawPassword.toString().toCharArray());
 	}
 
 	@Override
+	public String encode(char[] rawPassword) {
+		return digest(rawPassword, this.saltGenerator.generateKey());
+	}
+
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+		return matches(rawPassword.toString().toCharArray(), encodedPassword);
+	}
+
+	@Override
+	public boolean matches(char[] rawPassword, String encodedPassword) {
 		if (encodedPassword == null || encodedPassword.length() < this.keyLength) {
 			this.logger.warn("Empty encoded password");
 			return false;
@@ -146,7 +154,7 @@ public class SCryptPasswordEncoder implements PasswordEncoder {
 		return cpuCost < this.cpuCost || memoryCost < this.memoryCost || parallelization < this.parallelization;
 	}
 
-	private boolean decodeAndCheckMatches(CharSequence rawPassword, String encodedPassword) {
+	private boolean decodeAndCheckMatches(char[] rawPassword, String encodedPassword) {
 		String[] parts = encodedPassword.split("\\$");
 		if (parts.length != 4) {
 			return false;
@@ -162,7 +170,7 @@ public class SCryptPasswordEncoder implements PasswordEncoder {
 		return MessageDigest.isEqual(derived, generated);
 	}
 
-	private String digest(CharSequence rawPassword, byte[] salt) {
+	private String digest(char[] rawPassword, byte[] salt) {
 		byte[] derived = SCrypt.generate(Utf8.encode(rawPassword), salt, this.cpuCost, this.memoryCost,
 				this.parallelization, this.keyLength);
 		String params = Long.toString(
@@ -176,7 +184,7 @@ public class SCryptPasswordEncoder implements PasswordEncoder {
 	}
 
 	private byte[] decodePart(String part) {
-		return Base64.getDecoder().decode(Utf8.encode(part));
+		return Base64.getDecoder().decode(Utf8.encode(part.toCharArray()));
 	}
 
 	private String encodePart(byte[] part) {
